@@ -1,0 +1,40 @@
+name: Google Docs Sync to GitHub
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Sync Google Docs to GitHub
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GCI }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GCS }}
+        run: |
+          python3 sync_docs.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add synced_docs/document.html
+          git commit -m "Updated synced Google Doc"
+          git push
