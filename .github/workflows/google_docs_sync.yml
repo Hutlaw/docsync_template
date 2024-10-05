@@ -33,9 +33,11 @@ jobs:
           python3 sync_docs.py
 
       - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GT }}
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
           git add synced_docs/document.html || exit 1
           git commit -m "Updated synced Google Doc" || echo "Nothing to commit"
-          git push || echo "Nothing to push, already up to date"
+          git push https://x-access-token:${{ secrets.GT }}@github.com/${{ github.repository }}.git || echo "Nothing to push, already up to date"
