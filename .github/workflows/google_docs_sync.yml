@@ -5,15 +5,16 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight
+    - cron: '0 0 * * *'
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -35,6 +36,6 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add synced_docs/document.html
-          git commit -m "Updated synced Google Doc"
-          git push
+          git add synced_docs/document.html || exit 1  # Ensure add works, fail gracefully
+          git commit -m "Updated synced Google Doc" || echo "Nothing to commit"  # Handle case when nothing changes
+          git push || echo "Nothing to push, already up to date"
