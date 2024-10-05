@@ -1,58 +1,28 @@
 import os
 import json
 import logging
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 SCOPES = ['https://www.googleapis.com/auth/documents.readonly']
+SERVICE_ACCOUNT_INFO = os.getenv("SERVICE_ACCOUNT_KEY")
 DOC_ID = os.getenv("DOCUMENT_ID")
 
 def authenticate():
-    if CLIENT_ID is None or CLIENT_SECRET is None:
-        logging.error("Google Client ID and Secret are missing from environment variables.")
-        raise EnvironmentError("Missing Google API credentials.")
+    if not SERVICE_ACCOUNT_INFO:
+        logging.error("Service Account key missing from environment variables.")
+        raise EnvironmentError("Missing Service Account credentials.")
 
-    creds = None
-    if os.path.exists('token.json'):
-        try:
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        except Exception as e:
-            logging.error(f"Error reading token.json: {e}")
-            creds = None
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-                logging.info("Token refreshed successfully.")
-            except Exception as e:
-                logging.error(f"Error refreshing token: {e}")
-                raise
-        else:
-            try:
-                flow = InstalledAppFlow.from_client_config({
-                    "installed": {
-                        "client_id": CLIENT_ID,
-                        "client_secret": CLIENT_SECRET,
-                        "redirect_uris": ["http://localhost"],
-                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                        "token_uri": "https://accounts.google.com/o/oauth2/token"
-                    }
-                }, SCOPES)
-                creds = flow.run_local_server(port=0)
-                with open('token.json', 'w') as token:
-                    token.write(creds.to_json())
-                logging.info("New token created and saved to token.json.")
-            except Exception as e:
-                logging.error(f"Error during OAuth flow: {e}")
-                raise
-    return creds
+    try:
+        service_account_info = json.loads(SERVICE_ACCOUNT_INFO)
+        creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+        logging.info("Successfully authenticated using Service Account.")
+        return creds
+    except Exception as e:
+        logging.error(f"Failed to authenticate using Service Account: {e}")
+        raise
 
 def fetch_google_doc(service):
     try:
