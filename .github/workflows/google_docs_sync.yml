@@ -27,8 +27,7 @@ jobs:
 
       - name: Sync Google Docs to GitHub
         env:
-          GOOGLE_CLIENT_ID: ${{ secrets.GCI }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GCS }}
+          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           DOCUMENT_ID: ${{ secrets.DID }}
         run: |
           python3 sync_docs.py
