@@ -17,21 +17,14 @@ def run_command(command):
 def export_google_doc_to_html(document_id, file_path):
     service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_KEY"))
     creds = service_account.Credentials.from_service_account_info(service_account_info)
-    docs_service = build('docs', 'v1', credentials=creds)
-    doc = docs_service.documents().get(documentId=document_id).execute()
-    content = doc.get('body').get('content')
+    drive_service = build('drive', 'v3', credentials=creds)
     
-    html_content = "<html><body>"
-    for element in content:
-        if 'paragraph' in element:
-            for text_run in element['paragraph']['elements']:
-                if 'textRun' in text_run:
-                    html_content += text_run['textRun']['content'].replace('\n', '<br>') + '<br>'
-    html_content += "</body></html>"
+    request = drive_service.files().export(fileId=document_id, mimeType='text/html')
+    response = request.execute()
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'w') as f:
-        f.write(html_content)
+        f.write(response)
 
 def sync_docs_to_github():
     try:
