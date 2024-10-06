@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 
 def run_command(command):
     try:
@@ -29,18 +30,24 @@ def sync_docs_to_github():
         run_command('git config --global user.email "github-actions@github.com"')
         run_command('git config --global user.name "GitHub Actions"')
 
-        # Ensure synced_docs/document.html exists
+        # Path to document
         document_path = 'synced_docs/document.html'
-        create_document_if_missing(document_path)
 
-        # Stash any local changes before pulling
-        run_command('git stash')
+        # Remove the document to avoid conflict during pull
+        if os.path.exists(document_path):
+            print(f"Temporarily removing {document_path} to avoid pull conflicts")
+            shutil.move(document_path, document_path + ".bak")
 
         # Pull the latest changes from the main branch
         run_command('git pull origin main')
 
-        # Reapply stashed changes after pull
-        run_command('git stash pop || true')  # In case there's nothing to pop
+        # Restore the document after pull
+        if os.path.exists(document_path + ".bak"):
+            print(f"Restoring {document_path}")
+            shutil.move(document_path + ".bak", document_path)
+
+        # Ensure the document exists
+        create_document_if_missing(document_path)
 
         # Check if there are changes to commit
         changes = run_command('git status --porcelain')
@@ -52,7 +59,7 @@ def sync_docs_to_github():
             # Commit the changes
             run_command('git commit -m "Updated synced Google Doc"')
 
-            # Push the changes (force push to resolve non-fast-forward issues)
+            # Force push the changes to the remote branch
             run_command('git push --force origin main')
 
             print("Changes successfully pushed to GitHub.")
