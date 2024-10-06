@@ -14,10 +14,16 @@ def sync_docs_to_github():
         run_command('git config --global user.email "github-actions@github.com"')
         run_command('git config --global user.name "GitHub Actions"')
         run_command('git pull origin main')
-        run_command('git add .')
-        run_command('git commit -m "Updated synced Google Doc"')
-        run_command('git push origin main')
-        print("Changes successfully pushed to GitHub.")
+        changes = run_command('git status --porcelain')
+
+        if changes:
+            run_command('git add .')
+            run_command('git commit -m "Updated synced Google Doc"')
+            run_command('git push origin main')
+
+            print("Changes successfully pushed to GitHub.")
+        else:
+            print("No changes to commit.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during sync: {e}")
         print(f"Error output: {e.stderr}")
