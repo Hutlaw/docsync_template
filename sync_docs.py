@@ -55,7 +55,7 @@ def sync_docs_to_github():
             run_command('git commit -m "Updated synced Google Doc"')
             run_command('git push --force origin main')
 
-            print("Changes successfully pushed to GitHub."
+            print("Changes successfully pushed to GitHub.")
         else:
             print("No changes to commit.")
     except subprocess.CalledProcessError as e:
