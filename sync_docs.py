@@ -6,6 +6,8 @@ def run_command(command):
 
 def sync_docs_to_github():
     try:
+        run_command('git config --global user.email "github-actions@github.com"')
+        run_command('git config --global user.name "GitHub Actions"')
         run_command('git pull origin main')
         run_command('git add .')
         run_command('git commit -m "Updated synced Google Doc"')
