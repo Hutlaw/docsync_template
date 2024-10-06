@@ -1,6 +1,8 @@
 import subprocess
 import os
 import shutil
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 def run_command(command):
     try:
@@ -11,58 +13,49 @@ def run_command(command):
         print(f"Error output: {e.stderr}")
         raise
 
-def create_document_if_missing(file_path):
-    """Create the file if it doesn't exist."""
-    if not os.path.exists(file_path):
-        # Create directories if they don't exist
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+def export_google_doc_to_html(document_id, file_path):
+    creds = service_account.Credentials.from_service_account_file(os.getenv("SERVICE_ACCOUNT_KEY"))
+    docs_service = build('docs', 'v1', credentials=creds)
+    doc = docs_service.documents().get(documentId=document_id).execute()
+    content = doc.get('body').get('content')
+    
+    html_content = "<html><body>"
+    for element in content:
+        if 'paragraph' in element:
+            for text_run in element['paragraph']['elements']:
+                if 'textRun' in text_run:
+                    html_content += text_run['textRun']['content'].replace('\n', '<br>') + '<br>'
+    html_content += "</body></html>"
 
-        # Create an empty file or add default content
-        with open(file_path, 'w') as f:
-            f.write("<html><body><h1>Synced Google Doc</h1></body></html>")
-        print(f"File created: {file_path}")
-    else:
-        print(f"File already exists: {file_path}")
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, 'w') as f:
+        f.write(html_content)
 
 def sync_docs_to_github():
     try:
-        # Set up git user details
         run_command('git config --global user.email "github-actions@github.com"')
         run_command('git config --global user.name "GitHub Actions"')
 
-        # Path to document
         document_path = 'synced_docs/document.html'
 
-        # Remove the document to avoid conflict during pull
+        export_google_doc_to_html(os.getenv("DOCUMENT_ID"), document_path)
+
         if os.path.exists(document_path):
-            print(f"Temporarily removing {document_path} to avoid pull conflicts")
             shutil.move(document_path, document_path + ".bak")
 
-        # Pull the latest changes from the main branch
         run_command('git pull origin main')
 
-        # Restore the document after pull
         if os.path.exists(document_path + ".bak"):
-            print(f"Restoring {document_path}")
             shutil.move(document_path + ".bak", document_path)
 
-        # Ensure the document exists
-        create_document_if_missing(document_path)
-
-        # Check if there are changes to commit
         changes = run_command('git status --porcelain')
 
         if changes:
-            # Stage all changes
             run_command(f'git add {document_path}')
-
-            # Commit the changes
             run_command('git commit -m "Updated synced Google Doc"')
-
-            # Force push the changes to the remote branch
             run_command('git push --force origin main')
 
-            print("Changes successfully pushed to GitHub.")
+            print("Changes successfully pushed to GitHub."
         else:
             print("No changes to commit.")
     except subprocess.CalledProcessError as e:
