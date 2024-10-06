@@ -18,12 +18,12 @@ def export_google_doc_to_html(document_id, file_path):
     service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_KEY"))
     creds = service_account.Credentials.from_service_account_info(service_account_info)
     drive_service = build('drive', 'v3', credentials=creds)
-    
-    request = drive_service.files().export(fileId=document_id, mimeType='text/html')
+
+    request = drive_service.files().export_media(fileId=document_id, mimeType='text/html')
     response = request.execute()
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, 'w') as f:
+    with open(file_path, 'wb') as f:
         f.write(response)
 
 def sync_docs_to_github():
