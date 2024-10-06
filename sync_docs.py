@@ -1,6 +1,7 @@
 import subprocess
 import os
 import shutil
+import json
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -14,7 +15,8 @@ def run_command(command):
         raise
 
 def export_google_doc_to_html(document_id, file_path):
-    creds = service_account.Credentials.from_service_account_file(os.getenv("SERVICE_ACCOUNT_KEY"))
+    service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_KEY"))
+    creds = service_account.Credentials.from_service_account_info(service_account_info)
     docs_service = build('docs', 'v1', credentials=creds)
     doc = docs_service.documents().get(documentId=document_id).execute()
     content = doc.get('body').get('content')
