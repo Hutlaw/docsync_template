@@ -1,6 +1,6 @@
-{
+r{
   "tab_title": "My Google Doc Page",
   "favicon_url": "favicon.png",
-  "html_alignment": "left",
+  "html_alignment": "center",
   "github_html_path": "synced_docs/document.html"
 }
