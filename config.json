@@ -1,0 +1,6 @@
+{
+  "tab_title": "My Google Doc Page",
+  "favicon_url": "https://example.com/favicon.ico",
+  "html_alignment": "left",  // options: "left", "center", "right"
+  "github_html_path": "docs/index.html"
+}
