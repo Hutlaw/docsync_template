@@ -66,4 +66,16 @@ def sync_docs_to_github():
         
         if changes:
             run_command(f'git add {github_html_path}')
-            run_command('git commit -m "Updated
+            run_command('git commit -m "Updated synced Google Doc"')
+            run_command('git push --force origin main')
+            print("Changes successfully pushed to GitHub.")
+        else:
+            print("No changes to commit.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred during sync: {e}")
+        print(f"Error output: {e.stderr}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+
+if __name__ == "__main__":
+    sync_docs_to_github()
