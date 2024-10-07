@@ -1,6 +1,6 @@
 # README: Sync Google Docs to GitHub
 
-This repository allows you to automatically fetch the HTML of a Google Doc, modify it based on custom configurations (such as tab title, favicon, and alignment), and push the modified HTML to a specified location in a GitHub repository. It uses the Google Drive API to access the Google Docs content and GitHub Actions to automate the process.
+This repository allows you to automatically fetch the HTML of a Google Doc, modify it based on custom configurations (such as tab title, favicon, and alignment), and push the modified HTML to a specified location in a GitHub repository. It uses the Google Drive API to access the Google Docs content and GitHub Actions to automate the process. All formatting is done on Google Docs, allowing for easy formatting. You can keep this repository private and seperate from your site to keep your secrets secure too.
 
 ---
 
