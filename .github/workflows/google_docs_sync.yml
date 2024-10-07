@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+          pip install --upgrade google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client beautifulsoup4
 
       - name: Sync Google Docs to GitHub
         env:
