@@ -46,28 +46,24 @@ def sync_docs_to_github():
     try:
         with open('config.json') as f:
             config = json.load(f)
+        
         raw_html = export_google_doc_to_html(os.getenv("DOCUMENT_ID"))
         modified_html = modify_html(raw_html, config)
+        
         github_html_path = config['github_html_path']
-        os.makedirs(os.path.dirname(github_html_path), exist_ok=True)
+        
+        if not os.path.exists(os.path.dirname(github_html_path)):
+            os.makedirs(os.path.dirname(github_html_path))
+        
         with open(github_html_path, 'w', encoding='utf-8') as f:
             f.write(modified_html)
+        
         run_command('git config --global user.email "github-actions@github.com"')
         run_command('git config --global user.name "GitHub Actions"')
         run_command('git pull origin main')
+        
         changes = run_command('git status --porcelain')
+        
         if changes:
             run_command(f'git add {github_html_path}')
-            run_command('git commit -m "Updated synced Google Doc"')
-            run_command('git push --force origin main')
-            print("Changes successfully pushed to GitHub.")
-        else:
-            print("No changes to commit.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred during sync: {e}")
-        print(f"Error output: {e.stderr}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {str(e)}")
-
-if __name__ == "__main__":
-    sync_docs_to_github()
+            run_command('git commit -m "Updated
